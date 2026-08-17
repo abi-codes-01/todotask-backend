@@ -6,52 +6,54 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SpringBootApplication
 @RestController
-@RequestMapping("/api/items") // Matches API_URL endpoint path
-@CrossOrigin(origins = "*")    // Allows cross-origin fetch requests
+@CrossOrigin(origins = "*") // Allows cross-origin fetch requests from any domain
 public class TodotaskBackendApplication {
 
-    private final List<Task> tasks = new ArrayList<>();
+    // Thread-safe in-memory storage for concurrent web requests
+    private final List<Task> tasks = new CopyOnWriteArrayList<>();
 
     public static void main(String[] args) {
         SpringApplication.run(TodotaskBackendApplication.class, args);
     }
 
-	@GetMapping("/")
-public String home() {
-    return "TODOTASK Spring Boot Backend is running cleanly!";
-}
+    // Root path endpoint -> https://todotask-backend-qje0.onrender.com/
+    @GetMapping("/")
+    public String home() {
+        return "TODOTASK Spring Boot Backend is running cleanly!";
+    }
 
-    // Health Check Endpoint
-    @GetMapping("/health")
+    // Health Check Endpoint -> https://todotask-backend-qje0.onrender.com/api/items/health
+    @GetMapping("/api/items/health")
     public String health() {
         return "Backend is live!";
     }
 
-    // GET /api/items
-    @GetMapping
+    // GET /api/items -> Fetches task list
+    @GetMapping("/api/items")
     public List<Task> getTasks() {
         return tasks;
     }
 
-    // POST /api/items -> Receives { name, title, description }
-    @PostMapping
+    // POST /api/items -> Adds a new task
+    @PostMapping("/api/items")
     public Task addTask(@RequestBody Task task) {
-        task.setId(System.currentTimeMillis()); // Sets numeric ID matching Date.now() style
+        task.setId(System.currentTimeMillis());
         tasks.add(task);
         return task;
     }
 
-    // DELETE /api/items/{id}
-    @DeleteMapping("/{id}")
-    public String deleteTask(@PathVariable Long id) {
+    // DELETE /api/items/{id} -> Removes a task by ID
+    @DeleteMapping("/api/items/{id}")
+    public String deleteTask(@PathVariable("id") Long id) {
         tasks.removeIf(t -> t.getId() != null && t.getId().equals(id));
         return "Item deleted successfully";
     }
 
-    // Task DTO Class matching frontend field expectations exactly
+    // Task DTO Class
     public static class Task {
         private Long id;
         private String name;
