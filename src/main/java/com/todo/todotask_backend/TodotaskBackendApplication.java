@@ -19,6 +19,11 @@ public class TodotaskBackendApplication {
         SpringApplication.run(TodotaskBackendApplication.class, args);
     }
 
+	@GetMapping("/")
+public String home() {
+    return "TODOTASK Spring Boot Backend is running cleanly!";
+}
+
     // Health Check Endpoint
     @GetMapping("/health")
     public String health() {
